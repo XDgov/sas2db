@@ -25,10 +25,12 @@ with SAS7BDAT(args.src, skip_header=True) as reader:
         con.execute("DROP TABLE IF EXISTS " + args.table)
         con.execute("CREATE TABLE {} ({})".format(args.table, columns))
 
-    # continue
-
+    num_obs = 0
     for row in reader:
         with con:
             col_placeholders = ', '.join('?' for key in column_names)
             con.execute("INSERT INTO {} ({}) VALUES ({})".format(
                 args.table, ', '.join(column_names), col_placeholders), tuple(row))
+            num_obs += 1
+
+    print(num_obs, "observations written to", args.db)
