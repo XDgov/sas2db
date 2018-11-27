@@ -6,10 +6,12 @@ from sas7bdat import SAS7BDAT
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('src', help='path to the source *.sas7bdat file')
 parser.add_argument('table', help='name of the destination table')
+parser.add_argument('--db', default='sas.db',
+                    help='name of the SQLite file to use/create')
 
 args = parser.parse_args()
 
-con = sqlite3.connect('joined-from-sas.db')
+con = sqlite3.connect(args.db)
 
 
 def columns_from_fields(fields):
