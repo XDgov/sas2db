@@ -3,7 +3,8 @@ import sqlite3
 from sas7bdat import SAS7BDAT
 
 
-parser = argparse.ArgumentParser(description='Process some integers.')
+parser = argparse.ArgumentParser(description='Import SAS data into a SQLite3 table.',
+                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('src', help='path to the source *.sas7bdat file')
 parser.add_argument('table', help='name of the destination table')
 parser.add_argument('--db', default='sas.db',
