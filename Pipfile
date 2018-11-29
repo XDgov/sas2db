@@ -8,7 +8,6 @@ pylint = "*"
 autopep8 = "*"
 
 [packages]
-sas7bdat = "*"
 pandas = "*"
 
 [requires]

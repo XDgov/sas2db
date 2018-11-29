@@ -1,23 +1,13 @@
 import run
-import sqlite3
 import unittest
 
 
 class TestRun(unittest.TestCase):
-    # https://docs.python.org/3.7/library/sqlite3.html#sqlite3.Connection.row_factory
-    def dict_factory(self, cursor, row):
-        d = {}
-        for idx, col in enumerate(cursor.description):
-            d[col[0]] = row[idx]
-        return d
-
-    def create_db(self):
-        con = sqlite3.connect(':memory:')
-        con.row_factory = self.dict_factory
-        return con
-
     def setUp(self):
-        self.con = self.create_db()
+        self.con = run.create_db()
+
+    def tearDown(self):
+        self.con.close()
 
     def query_one(self, query):
         cur = self.con.cursor()

@@ -2,7 +2,21 @@ import argparse
 import pandas as pd
 import sqlite3
 from pathlib import Path
-from sas7bdat import SAS7BDAT
+
+# https://docs.python.org/3.7/library/sqlite3.html#sqlite3.Connection.row_factory
+
+
+def dict_factory(cursor, row):
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
+
+
+def create_db(name=':memory:'):
+    con = sqlite3.connect(name)
+    con.row_factory = dict_factory
+    return con
 
 
 def get_args():
@@ -18,17 +32,20 @@ def get_args():
 
 
 def run_import(src, con, table=None):
-    with SAS7BDAT(src, skip_header=True) as reader:
-        dataset_name = reader.properties.name.decode('utf-8')
-        table = table or dataset_name
+    reader = pd.read_sas(src, iterator=True)
 
-        print("Writing {} rows to {} table...".format(
-            reader.properties.row_count, table))
+    dataset_name = reader.name
+    table = table or dataset_name
+    print("Writing to {} table...".format(table))
 
-        df = pd.read_sas(src)
-        df.to_sql(table, con)
+    for chunk in reader:
+        chunk.to_sql(table, con, if_exists='append')
+    reader.close()
 
-        print("Done")
+    cur = con.cursor()
+    cur.execute('SELECT COUNT(*) FROM ' + table)
+    count = cur.fetchone()['COUNT(*)']
+    print("Wrote {} rows.".format(count))
 
 
 if __name__ == '__main__':
@@ -36,6 +53,6 @@ if __name__ == '__main__':
 
     db = args.db or Path(args.src).stem + '.db'
     print("Writing to {}...".format(db))
-    con = sqlite3.connect(db)
+    con = create_db(name=db)
 
     run_import(args.src, con, table=args.table)
