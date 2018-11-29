@@ -16,24 +16,33 @@ class TestRun(unittest.TestCase):
         con.row_factory = self.dict_factory
         return con
 
-    def test_import(self):
-        con = self.create_db()
-        run.run_import('example.sas7bdat', con)
+    def setUp(self):
+        self.con = self.create_db()
 
-        cur = con.cursor()
-        cur.execute('SELECT COUNT(*) AS count FROM example')
-        count = cur.fetchone()['count']
+    def query_one(self, query):
+        cur = self.con.cursor()
+        cur.execute(query)
+        return cur.fetchone()
+
+    def query_many(self, query):
+        cur = self.con.cursor()
+        cur.execute(query)
+        return cur.fetchall()
+
+    def test_import(self):
+        run.run_import('example.sas7bdat', self.con)
+
+        count = self.query_one(
+            'SELECT COUNT(*) AS count FROM example')['count']
         self.assertEqual(count, 20)
 
-        cur.execute('PRAGMA TABLE_INFO(example)')
-        columns = cur.fetchall()
+        columns = self.query_many('PRAGMA TABLE_INFO(example)')
         for column in columns:
             self.assertEqual(column['type'], 'string')
 
     def test_missing_src(self):
-        con = self.create_db()
         with self.assertRaises(FileNotFoundError):
-            run.run_import('nonexistent.sas7bdat', con)
+            run.run_import('nonexistent.sas7bdat', self.con)
 
 
 if __name__ == '__main__':
