@@ -4,18 +4,29 @@ import unittest
 
 
 class TestRun(unittest.TestCase):
-    def test_import(self):
-        con = sqlite3.connect(':memory:')
+    # https://docs.python.org/3.7/library/sqlite3.html#sqlite3.Connection.row_factory
+    def dict_factory(self, cursor, row):
+        d = {}
+        for idx, col in enumerate(cursor.description):
+            d[col[0]] = row[idx]
+        return d
 
+    def create_db(self):
+        con = sqlite3.connect(':memory:')
+        con.row_factory = self.dict_factory
+        return con
+
+    def test_import(self):
+        con = self.create_db()
         run.run_import('example.sas7bdat', con)
 
         cur = con.cursor()
-        cur.execute('SELECT COUNT(*) FROM example')
-        count = cur.fetchone()[0]
+        cur.execute('SELECT COUNT(*) AS count FROM example')
+        count = cur.fetchone()['count']
         self.assertEqual(count, 20)
 
     def test_missing_src(self):
-        con = sqlite3.connect(':memory:')
+        con = self.create_db()
         with self.assertRaises(FileNotFoundError):
             run.run_import('nonexistent.sas7bdat', con)
 
