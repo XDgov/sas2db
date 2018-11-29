@@ -34,12 +34,12 @@ def create_table(con, name, columns):
         con.execute("CREATE TABLE {} ({})".format(name, column_defs))
 
 
-def write_rows(con, table, column_names, reader):
+def write_rows(con, table, reader):
     for row in reader:
         with con:
-            col_placeholders = ', '.join('?' for key in column_names)
-            con.execute("INSERT INTO {} ({}) VALUES ({})".format(
-                table, ', '.join(column_names), col_placeholders), tuple(row))
+            col_placeholders = ', '.join('?' for col in reader.columns)
+            con.execute("INSERT INTO {} VALUES ({})".format(
+                table, col_placeholders), tuple(row))
 
 
 def run_import(src, con, table=None):
@@ -51,8 +51,7 @@ def run_import(src, con, table=None):
             reader.properties.row_count, table))
 
         create_table(con, table, reader.columns)
-        column_names = [col.decode('utf-8') for col in reader.column_names]
-        write_rows(con, table, column_names, reader)
+        write_rows(con, table, reader)
 
         print("Done")
 
