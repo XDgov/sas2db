@@ -1,6 +1,6 @@
 # sas2sqlite
 
-Convert SAS (`*.sas7bdat`) files to SQLite databases.
+Convert SAS files to SQLite databases. Supports both `*.sas7bdat` and XPORT (`*.xpt`) files.
 
 ## Usage
 

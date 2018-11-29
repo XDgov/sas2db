@@ -1,7 +1,22 @@
 import argparse
+import pandas as pd
 import sqlite3
 from pathlib import Path
-from sas7bdat import SAS7BDAT
+
+# https://docs.python.org/3.7/library/sqlite3.html#sqlite3.Connection.row_factory
+
+
+def dict_factory(cursor, row):
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
+
+
+def create_db(name=':memory:'):
+    con = sqlite3.connect(name)
+    con.row_factory = dict_factory
+    return con
 
 
 def get_args():
@@ -16,44 +31,23 @@ def get_args():
     return parser.parse_args()
 
 
-def sqlite_type(column):
-    if column.type == 'number':
-        # TODO real vs. integer
-        return 'REAL'
-    return 'TEXT'
+def run_import(src, con, chunksize=100, table=None):
+    reader = pd.read_sas(src, chunksize=chunksize)
 
+    dataset_name = getattr(reader, 'name', 'sas')
+    table = table or dataset_name
+    print("Writing to {} table...".format(table))
 
-def create_column_defs(columns):
-    return ', '.join(col.name.decode('utf-8') + ' ' + sqlite_type(col) for col in columns)
+    for i, chunk in enumerate(reader):
+        # throw an error if the table exists when writing the first chunk
+        if_exists = 'fail' if i == 0 else 'append'
+        chunk.to_sql(table, con, if_exists=if_exists)
+    reader.close()
 
-
-def create_table(con, name, columns):
-    column_defs = create_column_defs(columns)
-    with con:
-        con.execute("DROP TABLE IF EXISTS " + name)
-        con.execute("CREATE TABLE {} ({})".format(name, column_defs))
-
-
-def write_rows(con, table, reader):
-    for row in reader:
-        with con:
-            col_placeholders = ', '.join('?' for col in reader.columns)
-            con.execute("INSERT INTO {} VALUES ({})".format(
-                table, col_placeholders), tuple(row))
-
-
-def run_import(src, con, table=None):
-    with SAS7BDAT(src, skip_header=True) as reader:
-        dataset_name = reader.properties.name.decode('utf-8')
-        table = table or dataset_name
-
-        print("Writing {} rows to {} table...".format(
-            reader.properties.row_count, table))
-
-        create_table(con, table, reader.columns)
-        write_rows(con, table, reader)
-
-        print("Done")
+    cur = con.cursor()
+    cur.execute('SELECT COUNT(*) FROM ' + table)
+    count = cur.fetchone()['COUNT(*)']
+    print("Wrote {} rows.".format(count))
 
 
 if __name__ == '__main__':
@@ -61,6 +55,6 @@ if __name__ == '__main__':
 
     db = args.db or Path(args.src).stem + '.db'
     print("Writing to {}...".format(db))
-    con = sqlite3.connect(db)
+    con = create_db(name=db)
 
     run_import(args.src, con, table=args.table)
