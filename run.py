@@ -31,15 +31,17 @@ def get_args():
     return parser.parse_args()
 
 
-def run_import(src, con, table=None):
-    reader = pd.read_sas(src, iterator=True)
+def run_import(src, con, chunksize=100, table=None):
+    reader = pd.read_sas(src, chunksize=chunksize)
 
     dataset_name = reader.name
     table = table or dataset_name
     print("Writing to {} table...".format(table))
 
-    for chunk in reader:
-        chunk.to_sql(table, con, if_exists='append')
+    for i, chunk in enumerate(reader):
+        # throw an error if the table exists when writing the first chunk
+        if_exists = 'fail' if i == 0 else 'append'
+        chunk.to_sql(table, con, if_exists=if_exists)
     reader.close()
 
     cur = con.cursor()

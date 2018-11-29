@@ -38,6 +38,11 @@ class TestRun(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             run.run_import('nonexistent.sas7bdat', self.con)
 
+    def test_existing_table(self):
+        run.run_import('example.sas7bdat', self.con)
+        with self.assertRaises(ValueError):
+            run.run_import('example.sas7bdat', self.con)
+
 
 if __name__ == '__main__':
     unittest.main()
