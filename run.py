@@ -16,15 +16,22 @@ def get_args():
     return parser.parse_args()
 
 
-def columns_from_fields(fields):
-    return ', '.join(col + " string" for col in fields)
+def sqlite_type(column):
+    if column.type == 'number':
+        # TODO real vs. integer
+        return 'REAL'
+    return 'TEXT'
 
 
-def create_table(con, name, column_names):
-    columns = columns_from_fields(column_names)
+def create_column_defs(columns):
+    return ', '.join(col.name.decode('utf-8') + ' ' + sqlite_type(col) for col in columns)
+
+
+def create_table(con, name, columns):
+    column_defs = create_column_defs(columns)
     with con:
         con.execute("DROP TABLE IF EXISTS " + name)
-        con.execute("CREATE TABLE {} ({})".format(name, columns))
+        con.execute("CREATE TABLE {} ({})".format(name, column_defs))
 
 
 def write_rows(con, table, column_names, reader):
@@ -43,8 +50,8 @@ def run_import(src, con, table=None):
         print("Writing {} rows to {} table...".format(
             reader.properties.row_count, table))
 
+        create_table(con, table, reader.columns)
         column_names = [col.decode('utf-8') for col in reader.column_names]
-        create_table(con, table, column_names)
         write_rows(con, table, column_names, reader)
 
         print("Done")

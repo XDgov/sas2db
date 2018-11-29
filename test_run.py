@@ -32,13 +32,17 @@ class TestRun(unittest.TestCase):
     def test_import(self):
         run.run_import('example.sas7bdat', self.con)
 
-        count = self.query_one(
-            'SELECT COUNT(*) AS count FROM example')['count']
+        count = self.query_one('SELECT COUNT(*) FROM example')['COUNT(*)']
         self.assertEqual(count, 20)
 
         columns = self.query_many('PRAGMA TABLE_INFO(example)')
-        for column in columns:
-            self.assertEqual(column['type'], 'string')
+        column_types = {col['name']: col['type'] for col in columns}
+        self.assertEqual(column_types['begin'], 'REAL')
+        self.assertEqual(column_types['enddate'], 'REAL')
+        self.assertEqual(column_types['Info'], 'TEXT')
+        self.assertEqual(column_types['year'], 'REAL')
+        self.assertEqual(column_types['Capital'], 'REAL')
+        self.assertEqual(column_types['YearFormatted'], 'REAL')
 
     def test_missing_src(self):
         with self.assertRaises(FileNotFoundError):
