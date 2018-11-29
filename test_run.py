@@ -25,6 +25,11 @@ class TestRun(unittest.TestCase):
         count = cur.fetchone()['count']
         self.assertEqual(count, 20)
 
+        cur.execute('PRAGMA TABLE_INFO(example)')
+        columns = cur.fetchall()
+        for column in columns:
+            self.assertEqual(column['type'], 'string')
+
     def test_missing_src(self):
         con = self.create_db()
         with self.assertRaises(FileNotFoundError):
