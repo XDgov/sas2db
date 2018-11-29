@@ -35,15 +35,13 @@ def write_rows(con, table, column_names, reader):
                 table, ', '.join(column_names), col_placeholders), tuple(row))
 
 
-def run_import(src, db, table):
+def run_import(src, con, table=None):
     with SAS7BDAT(src, skip_header=True) as reader:
-        db = db or Path(src).stem + '.db'
-        con = sqlite3.connect(db)
         dataset_name = reader.properties.name.decode('utf-8')
         table = table or dataset_name
 
-        print("Writing {} rows to {} table in {}...".format(
-            reader.properties.row_count, table, db))
+        print("Writing {} rows to {} table...".format(
+            reader.properties.row_count, table))
 
         column_names = [col.decode('utf-8') for col in reader.column_names]
         create_table(con, table, column_names)
@@ -54,4 +52,9 @@ def run_import(src, db, table):
 
 if __name__ == '__main__':
     args = get_args()
-    run_import(args.src, args.db, args.table)
+
+    db = args.db or Path(args.src).stem + '.db'
+    print("Writing to {}...".format(db))
+    con = sqlite3.connect(db)
+
+    run_import(args.src, con, table=args.table)
