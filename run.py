@@ -34,7 +34,7 @@ def get_args():
 def run_import(src, con, chunksize=100, table=None):
     reader = pd.read_sas(src, chunksize=chunksize)
 
-    dataset_name = reader.name
+    dataset_name = getattr(reader, 'name', 'sas')
     table = table or dataset_name
     print("Writing to {} table...".format(table))
 
