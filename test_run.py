@@ -38,7 +38,7 @@ class TestRun(unittest.TestCase):
         columns = self.query_many('PRAGMA TABLE_INFO(example)')
         column_types = {col['name']: col['type'] for col in columns}
         self.assertEqual(column_types['begin'], 'REAL')
-        self.assertEqual(column_types['enddate'], 'REAL')
+        self.assertEqual(column_types['enddate'], 'TIMESTAMP')
         self.assertEqual(column_types['Info'], 'TEXT')
         self.assertEqual(column_types['year'], 'REAL')
         self.assertEqual(column_types['Capital'], 'REAL')

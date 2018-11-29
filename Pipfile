@@ -9,6 +9,7 @@ autopep8 = "*"
 
 [packages]
 sas7bdat = "*"
+pandas = "*"
 
 [requires]
 python_version = "3.7"

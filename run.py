@@ -1,4 +1,5 @@
 import argparse
+import pandas as pd
 import sqlite3
 from pathlib import Path
 from sas7bdat import SAS7BDAT
@@ -16,32 +17,6 @@ def get_args():
     return parser.parse_args()
 
 
-def sqlite_type(column):
-    if column.type == 'number':
-        # TODO real vs. integer
-        return 'REAL'
-    return 'TEXT'
-
-
-def create_column_defs(columns):
-    return ', '.join(col.name.decode('utf-8') + ' ' + sqlite_type(col) for col in columns)
-
-
-def create_table(con, name, columns):
-    column_defs = create_column_defs(columns)
-    with con:
-        con.execute("DROP TABLE IF EXISTS " + name)
-        con.execute("CREATE TABLE {} ({})".format(name, column_defs))
-
-
-def write_rows(con, table, reader):
-    for row in reader:
-        with con:
-            col_placeholders = ', '.join('?' for col in reader.columns)
-            con.execute("INSERT INTO {} VALUES ({})".format(
-                table, col_placeholders), tuple(row))
-
-
 def run_import(src, con, table=None):
     with SAS7BDAT(src, skip_header=True) as reader:
         dataset_name = reader.properties.name.decode('utf-8')
@@ -50,8 +25,8 @@ def run_import(src, con, table=None):
         print("Writing {} rows to {} table...".format(
             reader.properties.row_count, table))
 
-        create_table(con, table, reader.columns)
-        write_rows(con, table, reader)
+        df = pd.read_sas(src)
+        df.to_sql(table, con)
 
         print("Done")
 
