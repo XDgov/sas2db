@@ -63,7 +63,7 @@ def run_import(src, con, chunksize=100, normalize=False, table=None):
     print("Wrote {} rows.".format(count))
 
 
-if __name__ == '__main__':
+def main():
     args = get_args()
 
     db = args.db or Path(args.src).stem + '.db'
@@ -71,3 +71,7 @@ if __name__ == '__main__':
     con = create_db(name=db)
 
     run_import(args.src, con, normalize=args.normalize, table=args.table)
+
+
+if __name__ == '__main__':
+    main()

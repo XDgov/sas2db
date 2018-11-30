@@ -4,15 +4,19 @@ Convert SAS files to SQLite databases. Supports both `*.sas7bdat` and XPORT (`*.
 
 ## Usage
 
-1. Install Python 3 and [Pipenv](https://pipenv.readthedocs.io/en/latest/).
-1. Clone/download the repository.
-1. From the project directory, run
+1. Install Python 3 and pip.
+1. Install the package.
 
     ```sh
-    pipenv install
-    pipenv shell
-    python3 run.py path/to/src.sas7bdat
+    pip install sas2sqlite
     ```
+
+1. Run the conversion.
+
+    ```sh
+    sas2sqlite path/to/src.sas7bdat
+    ```
+
 1. A `src.db` (matching your input file name) will be created.
 1. Run SQL! Example:
 
@@ -27,18 +31,33 @@ Convert SAS files to SQLite databases. Supports both `*.sas7bdat` and XPORT (`*.
 For more options:
 
 ```sh
-python3 run.py -h
+sas2sqlite -h
 ```
 
 ## Development
 
-Run tests:
+1. Install [Pipenv](https://pipenv.readthedocs.io/en/latest/).
+1. Clone/download the repository.
+1. From the project directory, run
+
+    ```sh
+    pipenv install
+    pipenv shell
+    ```
+
+1. Run tests:
+
+    ```sh
+    python -m unittest
+    ```
+
+To use the script:
 
 ```sh
-python -m unittest
+python3 sas2sqlite/run.py path/to/src.sas7bdat
 ```
 
-More information about data types:
+[data.gov](https://catalog.data.gov/dataset?res_format=Zipped+SAS7BDAT) has data sets you can test with. Information about data types:
 
 * Documentation
     * [SQLite types](https://www.sqlite.org/datatype3.html#affinity_name_examples)
