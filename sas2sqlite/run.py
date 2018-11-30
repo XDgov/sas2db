@@ -1,23 +1,12 @@
 import argparse
 import inflection
 import pandas as pd
-import sqlite3
 from pathlib import Path
-
-# https://docs.python.org/3.7/library/sqlite3.html#sqlite3.Connection.row_factory
-
-
-def dict_factory(cursor, row):
-    d = {}
-    for idx, col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return d
+from sqlalchemy import create_engine
 
 
 def create_db(name=':memory:'):
-    con = sqlite3.connect(name)
-    con.row_factory = dict_factory
-    return con
+    return create_engine('sqlite+pysqlite:///' + name)
 
 
 def get_args():
@@ -35,9 +24,8 @@ def get_args():
 
 
 def row_count(con, table):
-    cur = con.cursor()
-    cur.execute('SELECT COUNT(*) FROM ' + table)
-    return cur.fetchone()['COUNT(*)']
+    result = con.execute('SELECT COUNT(*) FROM ' + table)
+    return result.fetchone()['COUNT(*)']
 
 
 def write_to_db(reader, con, table, normalize=False):
@@ -70,9 +58,10 @@ def main():
 
     db = args.db or Path(args.src).stem + '.db'
     print("Writing to {}...".format(db))
-    con = create_db(name=db)
+    engine = create_db(name=db)
 
-    run_import(args.src, con, normalize=args.normalize, table=args.table)
+    with engine.begin() as con:
+        run_import(args.src, con, normalize=args.normalize, table=args.table)
 
 
 if __name__ == '__main__':

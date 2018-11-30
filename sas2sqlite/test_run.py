@@ -6,21 +6,20 @@ from . import run
 class TestRun(unittest.TestCase):
     DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 
-    def setUp(self):
-        self.con = run.create_db()
-
-    def tearDown(self):
-        self.con.close()
+    # https://stackoverflow.com/a/11180583/358804
+    def run(self, result=None):
+        engine = run.create_db()
+        with engine.begin() as con:
+            self.con = con
+            super(TestRun, self).run(result)
 
     def query_one(self, query):
-        cur = self.con.cursor()
-        cur.execute(query)
-        return cur.fetchone()
+        result = self.con.execute(query)
+        return result.fetchone()
 
     def query_many(self, query):
-        cur = self.con.cursor()
-        cur.execute(query)
-        return cur.fetchall()
+        result = self.con.execute(query)
+        return result.fetchall()
 
     def test_import_sas(self):
         data_path = os.path.join(self.DATA_DIR, 'example.sas7bdat')
@@ -31,12 +30,12 @@ class TestRun(unittest.TestCase):
 
         columns = self.query_many('PRAGMA TABLE_INFO(example)')
         column_types = {col['name']: col['type'] for col in columns}
-        self.assertEqual(column_types['begin'], 'REAL')
-        self.assertEqual(column_types['enddate'], 'TIMESTAMP')
+        self.assertEqual(column_types['begin'], 'FLOAT')
+        self.assertEqual(column_types['enddate'], 'DATETIME')
         self.assertEqual(column_types['Info'], 'TEXT')
-        self.assertEqual(column_types['year'], 'REAL')
-        self.assertEqual(column_types['Capital'], 'REAL')
-        self.assertEqual(column_types['YearFormatted'], 'REAL')
+        self.assertEqual(column_types['year'], 'FLOAT')
+        self.assertEqual(column_types['Capital'], 'FLOAT')
+        self.assertEqual(column_types['YearFormatted'], 'FLOAT')
 
     def test_import_xport(self):
         data_path = os.path.join(self.DATA_DIR, 'test.xpt')
@@ -49,8 +48,8 @@ class TestRun(unittest.TestCase):
         column_types = {col['name']: col['type'] for col in columns}
         self.assertEqual(column_types['VIT_STAT'], 'TEXT')
         self.assertEqual(column_types['ECON'], 'TEXT')
-        self.assertEqual(column_types['COUNT'], 'REAL')
-        self.assertEqual(column_types['TEMP'], 'REAL')
+        self.assertEqual(column_types['COUNT'], 'FLOAT')
+        self.assertEqual(column_types['TEMP'], 'FLOAT')
 
     def test_normalize_columns(self):
         data_path = os.path.join(self.DATA_DIR, 'example.sas7bdat')
