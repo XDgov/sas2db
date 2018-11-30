@@ -1,4 +1,5 @@
 import argparse
+import inflection
 import pandas as pd
 import sqlite3
 from pathlib import Path
@@ -25,13 +26,15 @@ def get_args():
     parser.add_argument('src', help='path to the source *.sas7bdat file')
     parser.add_argument(
         '--db', help='name of the SQLite file to use/create - defaults to name of the SAS file')
+    parser.add_argument('--normalize', action='store_true',
+                        help="normalize the column names as underscored and lowercased (snake-case)")
     parser.add_argument(
         '--table', help='name of the destination table - defaults to the dataset name from the SAS file')
 
     return parser.parse_args()
 
 
-def run_import(src, con, chunksize=100, table=None):
+def run_import(src, con, chunksize=100, normalize=False, table=None):
     reader = pd.read_sas(src, chunksize=chunksize)
 
     dataset_name = getattr(reader, 'name', 'sas')
@@ -39,6 +42,8 @@ def run_import(src, con, chunksize=100, table=None):
     print("Writing to {} table...".format(table))
 
     for i, chunk in enumerate(reader):
+        if normalize:
+            chunk = chunk.rename(columns=inflection.underscore)
         # throw an error if the table exists when writing the first chunk
         if_exists = 'fail' if i == 0 else 'append'
         chunk.to_sql(table, con, if_exists=if_exists)
@@ -57,4 +62,4 @@ if __name__ == '__main__':
     print("Writing to {}...".format(db))
     con = create_db(name=db)
 
-    run_import(args.src, con, table=args.table)
+    run_import(args.src, con, normalize=args.normalize, table=args.table)

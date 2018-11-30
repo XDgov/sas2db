@@ -47,6 +47,15 @@ class TestRun(unittest.TestCase):
         self.assertEqual(column_types['COUNT'], 'REAL')
         self.assertEqual(column_types['TEMP'], 'REAL')
 
+    def test_normalize_columns(self):
+        run.run_import('example.sas7bdat', self.con, normalize=True)
+
+        columns = self.query_many(
+            "SELECT name FROM PRAGMA_TABLE_INFO('example')")
+        names = [col['name'] for col in columns]
+        self.assertEqual(
+            names, ['index', 'begin', 'enddate', 'info', 'year', 'capital', 'year_formatted'])
+
     def test_missing_src(self):
         with self.assertRaises(FileNotFoundError):
             run.run_import('nonexistent.sas7bdat', self.con)
