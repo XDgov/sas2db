@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "b209669f0593e0961c8fed4c0e9383bdc5210231b718e076474feb510242848c"
+            "sha256": "21741f8c94ce49d972aacf89c18bad067df11549cdcbdb60d315c801cbe8117b"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -20,7 +20,6 @@
             "hashes": [
                 "sha256:18ea7fb7a7d152853386523def08736aa8c32636b047ade55f7578c4edeb16ca"
             ],
-            "index": "pypi",
             "version": "==0.3.1"
         },
         "numpy": {
@@ -79,7 +78,6 @@
                 "sha256:f71f1a7e2d03758f6e957896ed696254e2bc83110ddbc6942018f1a232dd9dad",
                 "sha256:fb944c8f0b0ab5c1f7846c686bc4cdf8cde7224655c12edcd59d5212cd57bec0"
             ],
-            "index": "pypi",
             "version": "==0.23.4"
         },
         "python-dateutil": {
@@ -95,6 +93,10 @@
                 "sha256:8e0f8568c118d3077b46be7d654cc8167fa916092e28320cde048e54bfc9f1e6"
             ],
             "version": "==2018.7"
+        },
+        "sas2sqlite": {
+            "editable": true,
+            "path": "."
         },
         "six": {
             "hashes": [

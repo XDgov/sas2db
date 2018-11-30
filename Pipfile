@@ -8,8 +8,7 @@ pylint = "*"
 autopep8 = "*"
 
 [packages]
-pandas = "*"
-inflection = "*"
+sas2sqlite = {editable = true,path = "."}
 
 [requires]
 python_version = "3.7"
