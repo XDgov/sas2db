@@ -34,6 +34,21 @@ def get_args():
     return parser.parse_args()
 
 
+def row_count(con, table):
+    cur = con.cursor()
+    cur.execute('SELECT COUNT(*) FROM ' + table)
+    return cur.fetchone()['COUNT(*)']
+
+
+def write_to_db(reader, con, table, normalize=False):
+    for i, chunk in enumerate(reader):
+        if normalize:
+            chunk = chunk.rename(columns=inflection.underscore)
+        # throw an error if the table exists when writing the first chunk
+        if_exists = 'fail' if i == 0 else 'append'
+        chunk.to_sql(table, con, if_exists=if_exists)
+
+
 def run_import(src, con, chunksize=100, normalize=False, table=None):
     reader = pd.read_sas(src, chunksize=chunksize)
 
@@ -41,17 +56,10 @@ def run_import(src, con, chunksize=100, normalize=False, table=None):
     table = table or dataset_name
     print("Writing to {} table...".format(table))
 
-    for i, chunk in enumerate(reader):
-        if normalize:
-            chunk = chunk.rename(columns=inflection.underscore)
-        # throw an error if the table exists when writing the first chunk
-        if_exists = 'fail' if i == 0 else 'append'
-        chunk.to_sql(table, con, if_exists=if_exists)
+    write_to_db(reader, con, table, normalize=normalize)
     reader.close()
 
-    cur = con.cursor()
-    cur.execute('SELECT COUNT(*) FROM ' + table)
-    count = cur.fetchone()['COUNT(*)']
+    count = row_count(con, table)
     print("Wrote {} rows.".format(count))
 
 

@@ -51,10 +51,10 @@ class TestRun(unittest.TestCase):
         run.run_import('example.sas7bdat', self.con, normalize=True)
 
         columns = self.query_many(
-            "SELECT name FROM PRAGMA_TABLE_INFO('example')")
+            "SELECT name FROM PRAGMA_TABLE_INFO('example') ORDER BY name")
         names = [col['name'] for col in columns]
         self.assertEqual(
-            names, ['index', 'begin', 'enddate', 'info', 'year', 'capital', 'year_formatted'])
+            names, ['begin', 'capital', 'enddate', 'index', 'info', 'year', 'year_formatted'])
 
     def test_missing_src(self):
         with self.assertRaises(FileNotFoundError):
