@@ -1,10 +1,10 @@
 # sas2sqlite [![PyPI version](https://badge.fury.io/py/sas2sqlite.svg)](https://badge.fury.io/py/sas2sqlite)
 
-Convert SAS files to SQLite databases. Supports both `*.sas7bdat` and XPORT (`*.xpt`) files.
+Convert [SAS](https://en.wikipedia.org/wiki/SAS_(software)) files to [SQLite](https://www.sqlite.org/) databases. Supports both `*.sas7bdat` and XPORT (`*.xpt`) files.
 
 ## Usage
 
-1. Install Python 3 and pip.
+1. Install [Python 3](https://www.python.org/downloads/) and [pip](https://pip.pypa.io/en/stable/installing/).
 1. Install the package.
 
     ```sh
@@ -57,7 +57,7 @@ To use the script:
 python3 sas2sqlite/run.py path/to/src.sas7bdat
 ```
 
-[data.gov](https://catalog.data.gov/dataset?res_format=Zipped+SAS7BDAT) has data sets you can test with. Information about data types:
+[data.gov has data sets you can test with.](https://catalog.data.gov/dataset?res_format=Zipped+SAS7BDAT) Information about data types:
 
 * Documentation
     * [SQLite types](https://www.sqlite.org/datatype3.html#affinity_name_examples)
