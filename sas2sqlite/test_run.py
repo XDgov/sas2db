@@ -1,8 +1,11 @@
-import run
+import os
 import unittest
+from . import run
 
 
 class TestRun(unittest.TestCase):
+    DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+
     def setUp(self):
         self.con = run.create_db()
 
@@ -20,7 +23,8 @@ class TestRun(unittest.TestCase):
         return cur.fetchall()
 
     def test_import_sas(self):
-        run.run_import('example.sas7bdat', self.con)
+        data_path = os.path.join(self.DATA_DIR, 'example.sas7bdat')
+        run.run_import(data_path, self.con)
 
         count = self.query_one('SELECT COUNT(*) FROM example')['COUNT(*)']
         self.assertEqual(count, 20)
@@ -35,7 +39,8 @@ class TestRun(unittest.TestCase):
         self.assertEqual(column_types['YearFormatted'], 'REAL')
 
     def test_import_xport(self):
-        run.run_import('test.xpt', self.con)
+        data_path = os.path.join(self.DATA_DIR, 'test.xpt')
+        run.run_import(data_path, self.con)
 
         count = self.query_one('SELECT COUNT(*) FROM sas')['COUNT(*)']
         self.assertEqual(count, 6)
@@ -48,7 +53,8 @@ class TestRun(unittest.TestCase):
         self.assertEqual(column_types['TEMP'], 'REAL')
 
     def test_normalize_columns(self):
-        run.run_import('example.sas7bdat', self.con, normalize=True)
+        data_path = os.path.join(self.DATA_DIR, 'example.sas7bdat')
+        run.run_import(data_path, self.con, normalize=True)
 
         columns = self.query_many(
             "SELECT name FROM PRAGMA_TABLE_INFO('example') ORDER BY name")
@@ -61,9 +67,10 @@ class TestRun(unittest.TestCase):
             run.run_import('nonexistent.sas7bdat', self.con)
 
     def test_existing_table(self):
-        run.run_import('example.sas7bdat', self.con)
+        data_path = os.path.join(self.DATA_DIR, 'example.sas7bdat')
+        run.run_import(data_path, self.con)
         with self.assertRaises(ValueError):
-            run.run_import('example.sas7bdat', self.con)
+            run.run_import(data_path, self.con)
 
 
 if __name__ == '__main__':

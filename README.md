@@ -11,7 +11,7 @@ Convert SAS files to SQLite databases. Supports both `*.sas7bdat` and XPORT (`*.
     ```sh
     pipenv install
     pipenv shell
-    python3 run.py path/to/src.sas7bdat
+    python3 sas2sqlite/run.py path/to/src.sas7bdat
     ```
 1. A `src.db` (matching your input file name) will be created.
 1. Run SQL! Example:
