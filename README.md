@@ -1,4 +1,4 @@
-# sas2sqlite
+# sas2sqlite [![PyPI version](https://badge.fury.io/py/sas2sqlite.svg)](https://badge.fury.io/py/sas2sqlite)
 
 Convert SAS files to SQLite databases. Supports both `*.sas7bdat` and XPORT (`*.xpt`) files.
 
@@ -8,7 +8,7 @@ Convert SAS files to SQLite databases. Supports both `*.sas7bdat` and XPORT (`*.
 1. Install the package.
 
     ```sh
-    pip install sas2sqlite
+    pip3 install sas2sqlite
     ```
 
 1. Run the conversion.
