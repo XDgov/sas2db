@@ -9,7 +9,7 @@ psycopg2 = "*"
 pylint = "*"
 
 [packages]
-sas2sqlite = {editable = true,path = "."}
+sas2db = {editable = true,path = "."}
 
 [requires]
 python_version = "3.7"

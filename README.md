@@ -1,20 +1,26 @@
-# sas2sqlite [![PyPI version](https://badge.fury.io/py/sas2sqlite.svg)](https://badge.fury.io/py/sas2sqlite)
+# sas2db [![PyPI version](https://badge.fury.io/py/sas2db.svg)](https://badge.fury.io/py/sas2db)
 
-Convert [SAS](https://en.wikipedia.org/wiki/SAS_(software)) files to [SQLite](https://www.sqlite.org/) (or even [other SQL](#other-databases)) databases. Supports both `*.sas7bdat` and XPORT (`*.xpt`) files.
+Imports [SAS](https://en.wikipedia.org/wiki/SAS_(software)) files to SQL databases. Supports both `*.sas7bdat` and XPORT (`*.xpt`) files.
 
-## Usage
+## Installation
 
 1. Install [Python 3](https://www.python.org/downloads/) and [pip](https://pip.pypa.io/en/stable/installing/).
 1. Install the package.
 
     ```sh
-    pip3 install sas2sqlite
+    pip3 install sas2db
     ```
+
+## Usage
+
+### SQLite3
+
+`sas2db` supports [SQLite3](https://www.sqlite.org/) with no additional dependencies or setup, so we'll start with that. To import from SAS to SQLite3:
 
 1. Run the conversion.
 
     ```sh
-    sas2sqlite path/to/src.sas7bdat
+    sas2db path/to/src.sas7bdat
     ```
 
 1. A `src.db` (matching your input file name) will be created.
@@ -31,12 +37,12 @@ Convert [SAS](https://en.wikipedia.org/wiki/SAS_(software)) files to [SQLite](ht
 For more options:
 
 ```sh
-sas2sqlite -h
+sas2db -h
 ```
 
 ### Other databases
 
-While importing to SQLite3 works out of the box, `sas2sqlite` also supports other databases like PostgreSQL and MySQL. This support comes from [SQLAlchemy](https://www.sqlalchemy.org/) under the hood, so see [their list of supported "dialects"](https://docs.sqlalchemy.org/en/latest/dialects/index.html).
+Aside from SQLite3, `sas2db` supports other databases like PostgreSQL and MySQL. This support comes from [SQLAlchemy](https://www.sqlalchemy.org/) under the hood, so see [their list of supported "dialects"](https://docs.sqlalchemy.org/en/latest/dialects/index.html).
 
 To use another database:
 
@@ -44,7 +50,7 @@ To use another database:
 1. Install the corresponding driver.
     * On the [Dialects](https://docs.sqlalchemy.org/en/latest/dialects/index.html) page, click your preferred database, then under "DBAPI Support", click one of the options.
     * The first DBAPI option is probably fine, though you may have to try multiple.
-1. Run `sas2sqlite`, passing the [database URL](https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls) to the `--db` argument.
+1. Run `sas2db`, passing the [database URL](https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls) to the `--db` argument.
 
 Example for PostgreSQL:
 
@@ -52,9 +58,9 @@ Example for PostgreSQL:
 # create the database
 createdb -U postgres sas_import
 # install driver
-pip3 install --upgrade sas2sqlite psycopg2
+pip3 install psycopg2
 # run the import
-sas2sqlite --db postgresql+psycopg2://postgres@localhost:5432/sas_import path/to/src.sas7bdat
+sas2db --db postgresql+psycopg2://postgres@localhost:5432/sas_import path/to/src.sas7bdat
 ```
 
 ## Development
@@ -74,10 +80,10 @@ sas2sqlite --db postgresql+psycopg2://postgres@localhost:5432/sas_import path/to
     docker run --rm -it -p 5432:5432 --name pg postgres
     ```
 
-1. Create `sas2sqlite` database in PostgreSQL for testing. Example in Docker:
+1. Create `sas2db` database in PostgreSQL for testing. Example in Docker:
 
     ```sh
-    docker exec -it pg createdb -U postgres sas2sqlite
+    docker exec -it pg createdb -U postgres sas2db
     ```
 
 1. Run tests:
@@ -89,7 +95,7 @@ sas2sqlite --db postgresql+psycopg2://postgres@localhost:5432/sas_import path/to
 To use the script:
 
 ```sh
-python3 sas2sqlite/run.py path/to/src.sas7bdat
+python3 sas2db/run.py path/to/src.sas7bdat
 ```
 
 [data.gov has data sets you can test with.](https://catalog.data.gov/dataset?res_format=Zipped+SAS7BDAT) Information about data types:
