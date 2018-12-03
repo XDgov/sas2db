@@ -60,8 +60,9 @@ def main():
     args = get_args()
 
     db = args.db or Path(args.src).stem + '.db'
-    print("Writing to {}...".format(db))
     engine = create_db(url=db)
+    print("Writing to {} in {} using {}...".format(
+        db, engine.dialect.name, engine.dialect.driver))
 
     with engine.begin() as con:
         run_import(args.src, con, normalize=args.normalize, table=args.table)
