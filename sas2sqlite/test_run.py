@@ -9,8 +9,8 @@ class TestRun(unittest.TestCase):
 
     # https://stackoverflow.com/a/11180583/358804
     def run(self, result=None):
-        engine = run.create_db()
-        with engine.begin() as con:
+        self.engine = run.create_db()
+        with self.engine.begin() as con:
             self.con = con
             super(TestRun, self).run(result)
 
@@ -22,6 +22,19 @@ class TestRun(unittest.TestCase):
         result = self.con.execute(query)
         return result.fetchall()
 
+    def create_pg_db(self, base_con, name):
+        engine = run.create_db(base_con + 'postgres')
+        with engine.begin() as con:
+            # https://stackoverflow.com/a/8977109/358804
+            con.execute('COMMIT')
+            con.execute('DROP DATABASE IF EXISTS ' + name)
+            con.execute('CREATE DATABASE ' + name)
+
+    def table_info(self, name):
+        # https://docs.sqlalchemy.org/en/latest/core/reflection.html
+        meta = MetaData()
+        return Table(name, meta, autoload=True, autoload_with=self.engine)
+
     def test_import_sas(self):
         data_path = os.path.join(self.DATA_DIR, 'example.sas7bdat')
         run.run_import(data_path, self.con)
@@ -29,14 +42,13 @@ class TestRun(unittest.TestCase):
         count = self.query_one('SELECT COUNT(*) FROM example')['COUNT(*)']
         self.assertEqual(count, 20)
 
-        columns = self.query_many('PRAGMA TABLE_INFO(example)')
-        column_types = {col['name']: col['type'] for col in columns}
-        self.assertEqual(column_types['begin'], 'FLOAT')
-        self.assertEqual(column_types['enddate'], 'DATETIME')
-        self.assertEqual(column_types['Info'], 'TEXT')
-        self.assertEqual(column_types['year'], 'FLOAT')
-        self.assertEqual(column_types['Capital'], 'FLOAT')
-        self.assertEqual(column_types['YearFormatted'], 'FLOAT')
+        table = self.table_info('example')
+        self.assertIsInstance(table.columns.begin.type, types.FLOAT)
+        self.assertIsInstance(table.columns.enddate.type, types.DATETIME)
+        self.assertIsInstance(table.columns.Info.type, types.TEXT)
+        self.assertIsInstance(table.columns.year.type, types.FLOAT)
+        self.assertIsInstance(table.columns.Capital.type, types.FLOAT)
+        self.assertIsInstance(table.columns.YearFormatted.type, types.FLOAT)
 
     def test_import_xport(self):
         data_path = os.path.join(self.DATA_DIR, 'test.xpt')
@@ -45,12 +57,11 @@ class TestRun(unittest.TestCase):
         count = self.query_one('SELECT COUNT(*) FROM sas')['COUNT(*)']
         self.assertEqual(count, 6)
 
-        columns = self.query_many('PRAGMA TABLE_INFO(sas)')
-        column_types = {col['name']: col['type'] for col in columns}
-        self.assertEqual(column_types['VIT_STAT'], 'TEXT')
-        self.assertEqual(column_types['ECON'], 'TEXT')
-        self.assertEqual(column_types['COUNT'], 'FLOAT')
-        self.assertEqual(column_types['TEMP'], 'FLOAT')
+        table = self.table_info('sas')
+        self.assertIsInstance(table.columns.VIT_STAT.type, types.TEXT)
+        self.assertIsInstance(table.columns.ECON.type, types.TEXT)
+        self.assertIsInstance(table.columns.COUNT.type, types.FLOAT)
+        self.assertIsInstance(table.columns.TEMP.type, types.FLOAT)
 
     def test_normalize_columns(self):
         data_path = os.path.join(self.DATA_DIR, 'example.sas7bdat')
@@ -60,26 +71,20 @@ class TestRun(unittest.TestCase):
             "select name from sqlite_master where type = 'table'")
         self.assertEqual(tables, [('example',)])
 
-        columns = self.query_many(
-            "SELECT name FROM PRAGMA_TABLE_INFO('example') ORDER BY name")
-        names = [col['name'] for col in columns]
+        table = self.table_info('example')
+        names = [col.name for col in table.columns]
         self.assertEqual(
-            names, ['begin', 'capital', 'enddate', 'index', 'info', 'year', 'year_formatted'])
+            sorted(names), ['begin', 'capital', 'enddate', 'index', 'info', 'year', 'year_formatted'])
 
     def test_import_pg(self):
         base_con = 'postgresql+psycopg2://postgres@localhost:5432/'
-        engine = run.create_db(base_con + 'postgres')
         temp_db = 'sas2sqlite'
-        with engine.begin() as con:
-            # https://stackoverflow.com/a/8977109/358804
-            con.execute('COMMIT')
-            con.execute('DROP DATABASE IF EXISTS ' + temp_db)
-            con.execute('CREATE DATABASE ' + temp_db)
+        self.create_pg_db(base_con, temp_db)
 
         engine = run.create_db(base_con + temp_db)
-        # with engine.begin() as con:
         con = engine.connect()
         # TODO clean this up
+        self.engine = engine
         self.con = con
 
         with con.begin() as trans:
@@ -90,18 +95,13 @@ class TestRun(unittest.TestCase):
         count = self.query_one('SELECT COUNT(*) FROM example')[0]
         self.assertEqual(count, 20)
 
-        # https://docs.sqlalchemy.org/en/latest/core/reflection.html
-        meta = MetaData()
-        table = Table('example', meta, autoload=True,
-                      autoload_with=engine)
-
-        column_types = {col.name: col.type for col in table.columns}
-        self.assertIsInstance(column_types['begin'], types.Float)
-        self.assertIsInstance(column_types['enddate'], types.TIMESTAMP)
-        self.assertIsInstance(column_types['info'], types.TEXT)
-        self.assertIsInstance(column_types['year'], types.Float)
-        self.assertIsInstance(column_types['capital'], types.Float)
-        self.assertIsInstance(column_types['year_formatted'], types.Float)
+        table = self.table_info('example')
+        self.assertIsInstance(table.columns.begin.type, types.Float)
+        self.assertIsInstance(table.columns.enddate.type, types.TIMESTAMP)
+        self.assertIsInstance(table.columns.info.type, types.TEXT)
+        self.assertIsInstance(table.columns.year.type, types.Float)
+        self.assertIsInstance(table.columns.capital.type, types.Float)
+        self.assertIsInstance(table.columns.year_formatted.type, types.Float)
 
     def test_missing_src(self):
         with self.assertRaises(FileNotFoundError):
