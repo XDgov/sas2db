@@ -56,6 +56,10 @@ class TestRun(unittest.TestCase):
         data_path = os.path.join(self.DATA_DIR, 'example.sas7bdat')
         run.run_import(data_path, self.con, normalize=True)
 
+        tables = self.query_many(
+            "select name from sqlite_master where type = 'table'")
+        self.assertEqual(tables, [{'name': 'example'}])
+
         columns = self.query_many(
             "SELECT name FROM PRAGMA_TABLE_INFO('example') ORDER BY name")
         names = [col['name'] for col in columns]

@@ -27,7 +27,7 @@ def get_args():
     parser.add_argument(
         '--db', help='name of the SQLite file to use/create - defaults to name of the SAS file')
     parser.add_argument('--normalize', action='store_true',
-                        help="normalize the column names as underscored and lowercased (snake-case)")
+                        help="normalize the table and column names as underscored and lowercased (snake-case)")
     parser.add_argument(
         '--table', help='name of the destination table - defaults to the dataset name from the SAS file')
 
@@ -54,6 +54,8 @@ def run_import(src, con, chunksize=100, normalize=False, table=None):
 
     dataset_name = getattr(reader, 'name', 'sas')
     table = table or dataset_name
+    if normalize:
+        table = inflection.underscore(table)
     print("Writing to {} table...".format(table))
 
     write_to_db(reader, con, table, normalize=normalize)
