@@ -13,11 +13,11 @@ def create_db(url=':memory:'):
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description='Import SAS data into a SQLite3 table.',
+    parser = argparse.ArgumentParser(description='Import SAS data into a SQL table.',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('src', help='path to the source *.sas7bdat file')
     parser.add_argument(
-        '--db', help='name of the SQLite file to use/create - defaults to name of the SAS file')
+        '--db', help='name of the SQLite file to use/create, or the SQLAlchemy database URL (see https://github.com/XDgov/sas2sqlite#other-databases) - defaults to name of the SAS file')
     parser.add_argument('--normalize', action='store_true',
                         help="normalize the table and column names as underscored and lowercased (snake-case)")
     parser.add_argument(
