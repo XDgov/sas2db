@@ -45,6 +45,18 @@ sas2sqlite -h
     pipenv shell
     ```
 
+1. Run PostgreSQL. Example in Docker:
+
+    ```sh
+    docker run --rm -it -p 5432:5432 --name pg postgres
+    ```
+
+1. Create `sas2sqlite` database in PostgreSQL for testing. Example in Docker:
+
+    ```sh
+    docker exec -it pg createdb -U postgres sas2sqlite
+    ```
+
 1. Run tests:
 
     ```sh

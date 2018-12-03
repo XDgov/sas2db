@@ -5,8 +5,11 @@ from pathlib import Path
 from sqlalchemy import create_engine
 
 
-def create_db(name=':memory:'):
-    return create_engine('sqlite+pysqlite:///' + name)
+def create_db(url=':memory:'):
+    if '://' not in url:
+        # default to SQLite
+        url = 'sqlite+pysqlite:///' + url
+    return create_engine(url)
 
 
 def get_args():
@@ -25,7 +28,7 @@ def get_args():
 
 def row_count(con, table):
     result = con.execute('SELECT COUNT(*) FROM ' + table)
-    return result.fetchone()['COUNT(*)']
+    return result.fetchone()[0]
 
 
 def write_to_db(reader, con, table, normalize=False):
@@ -58,7 +61,7 @@ def main():
 
     db = args.db or Path(args.src).stem + '.db'
     print("Writing to {}...".format(db))
-    engine = create_db(name=db)
+    engine = create_db(url=db)
 
     with engine.begin() as con:
         run_import(args.src, con, normalize=args.normalize, table=args.table)

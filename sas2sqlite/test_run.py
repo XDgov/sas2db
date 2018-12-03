@@ -1,6 +1,7 @@
 import os
 import unittest
 from . import run
+from sqlalchemy import MetaData, Table, types
 
 
 class TestRun(unittest.TestCase):
@@ -57,13 +58,50 @@ class TestRun(unittest.TestCase):
 
         tables = self.query_many(
             "select name from sqlite_master where type = 'table'")
-        self.assertEqual(tables, [{'name': 'example'}])
+        self.assertEqual(tables, [('example',)])
 
         columns = self.query_many(
             "SELECT name FROM PRAGMA_TABLE_INFO('example') ORDER BY name")
         names = [col['name'] for col in columns]
         self.assertEqual(
             names, ['begin', 'capital', 'enddate', 'index', 'info', 'year', 'year_formatted'])
+
+    def test_import_pg(self):
+        base_con = 'postgresql+psycopg2://postgres@localhost:5432/'
+        engine = run.create_db(base_con + 'postgres')
+        temp_db = 'sas2sqlite'
+        with engine.begin() as con:
+            # https://stackoverflow.com/a/8977109/358804
+            con.execute('COMMIT')
+            con.execute('DROP DATABASE IF EXISTS ' + temp_db)
+            con.execute('CREATE DATABASE ' + temp_db)
+
+        engine = run.create_db(base_con + temp_db)
+        # with engine.begin() as con:
+        con = engine.connect()
+        # TODO clean this up
+        self.con = con
+
+        with con.begin() as trans:
+            data_path = os.path.join(self.DATA_DIR, 'example.sas7bdat')
+            # PostgreSQL is weird with capitalized table names, so just avoid the problem by normalizing
+            run.run_import(data_path, con, normalize=True)
+
+        count = self.query_one('SELECT COUNT(*) FROM example')[0]
+        self.assertEqual(count, 20)
+
+        # https://docs.sqlalchemy.org/en/latest/core/reflection.html
+        meta = MetaData()
+        table = Table('example', meta, autoload=True,
+                      autoload_with=engine)
+
+        column_types = {col.name: col.type for col in table.columns}
+        self.assertIsInstance(column_types['begin'], types.Float)
+        self.assertIsInstance(column_types['enddate'], types.TIMESTAMP)
+        self.assertIsInstance(column_types['info'], types.TEXT)
+        self.assertIsInstance(column_types['year'], types.Float)
+        self.assertIsInstance(column_types['capital'], types.Float)
+        self.assertIsInstance(column_types['year_formatted'], types.Float)
 
     def test_missing_src(self):
         with self.assertRaises(FileNotFoundError):
