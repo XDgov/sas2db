@@ -21,7 +21,7 @@ Convert [SAS](https://en.wikipedia.org/wiki/SAS_(software)) files to [SQLite](ht
 1. Run SQL! Example:
 
     ```
-    $ sqlite src.db
+    $ sqlite3 src.db
     sqlite> .tables
     mydata
     sqlite> SELECT COUNT(*) FROM mydata;
