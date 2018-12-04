@@ -1,31 +1,23 @@
 import argparse
 import inflection
 import pandas as pd
-import sqlite3
 from pathlib import Path
-
-# https://docs.python.org/3.7/library/sqlite3.html#sqlite3.Connection.row_factory
-
-
-def dict_factory(cursor, row):
-    d = {}
-    for idx, col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return d
+from sqlalchemy import create_engine
 
 
-def create_db(name=':memory:'):
-    con = sqlite3.connect(name)
-    con.row_factory = dict_factory
-    return con
+def create_db(url=':memory:'):
+    if '://' not in url:
+        # default to SQLite
+        url = 'sqlite+pysqlite:///' + url
+    return create_engine(url)
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description='Import SAS data into a SQLite3 table.',
+    parser = argparse.ArgumentParser(description='Import SAS data into a SQL table.',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('src', help='path to the source *.sas7bdat file')
     parser.add_argument(
-        '--db', help='name of the SQLite file to use/create - defaults to name of the SAS file')
+        '--db', help='name of the SQLite file to use/create, or the SQLAlchemy database URL (see https://github.com/XDgov/sas2sqlite#other-databases) - defaults to name of the SAS file')
     parser.add_argument('--normalize', action='store_true',
                         help="normalize the table and column names as underscored and lowercased (snake-case)")
     parser.add_argument(
@@ -35,9 +27,8 @@ def get_args():
 
 
 def row_count(con, table):
-    cur = con.cursor()
-    cur.execute('SELECT COUNT(*) FROM ' + table)
-    return cur.fetchone()['COUNT(*)']
+    result = con.execute('SELECT COUNT(*) FROM ' + table)
+    return result.fetchone()[0]
 
 
 def write_to_db(reader, con, table, normalize=False):
@@ -69,10 +60,12 @@ def main():
     args = get_args()
 
     db = args.db or Path(args.src).stem + '.db'
-    print("Writing to {}...".format(db))
-    con = create_db(name=db)
+    engine = create_db(url=db)
+    print("Writing to {} in {} using {}...".format(
+        db, engine.dialect.name, engine.dialect.driver))
 
-    run_import(args.src, con, normalize=args.normalize, table=args.table)
+    with engine.begin() as con:
+        run_import(args.src, con, normalize=args.normalize, table=args.table)
 
 
 if __name__ == '__main__':

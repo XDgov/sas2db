@@ -24,6 +24,7 @@ setuptools.setup(
     install_requires=[
         'inflection',
         'pandas',
+        'sqlalchemy',
     ],
     entry_points={
         'console_scripts': [

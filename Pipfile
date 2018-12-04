@@ -4,8 +4,9 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-pylint = "*"
 autopep8 = "*"
+psycopg2 = "*"
+pylint = "*"
 
 [packages]
 sas2sqlite = {editable = true,path = "."}
