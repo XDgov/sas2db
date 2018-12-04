@@ -4,14 +4,14 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="sas2sqlite",
+    name="sas2db",
     version="0.1.0",
     author="Aidan Feldman",
     author_email="aidan.l.feldman@census.gov",
-    description="Convert SAS files to SQLite databases",
+    description="Import SAS files to SQL databases",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/XDgov/sas2sqlite",
+    url="https://github.com/XDgov/sas2db",
     packages=setuptools.find_packages(),
     python_requires='>=3',
     classifiers=[
@@ -28,7 +28,7 @@ setuptools.setup(
     ],
     entry_points={
         'console_scripts': [
-            'sas2sqlite = sas2sqlite.run:main'
+            'sas2db = sas2db.run:main'
         ]
     }
 )

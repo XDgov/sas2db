@@ -78,7 +78,7 @@ class TestRun(unittest.TestCase):
 
     def test_import_pg(self):
         base_con = 'postgresql+psycopg2://postgres@localhost:5432/'
-        temp_db = 'sas2sqlite'
+        temp_db = 'sas2db'
         self.create_pg_db(base_con, temp_db)
 
         engine = run.create_db(base_con + temp_db)

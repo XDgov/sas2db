@@ -94,7 +94,7 @@
             ],
             "version": "==2018.7"
         },
-        "sas2sqlite": {
+        "sas2db": {
             "editable": true,
             "path": "."
         },
