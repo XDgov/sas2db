@@ -13,6 +13,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/XDgov/sas2sqlite",
     packages=setuptools.find_packages(),
+    python_requires='>=3',
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",
