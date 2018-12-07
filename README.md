@@ -4,6 +4,8 @@ Imports [SAS](https://en.wikipedia.org/wiki/SAS_(software)) files to SQL databas
 
 ## Installation
 
+_The SAS software itself is not required._
+
 1. Install [Python 3](https://www.python.org/downloads/) and [pip](https://pip.pypa.io/en/stable/installing/).
 1. Install the package.
 
