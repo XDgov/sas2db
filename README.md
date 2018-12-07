@@ -100,7 +100,20 @@ To use the script:
 python3 sas2db/run.py path/to/src.sas7bdat
 ```
 
-[data.gov has data sets you can test with.](https://catalog.data.gov/dataset?res_format=Zipped+SAS7BDAT) Information about data types:
+[data.gov has data sets you can test with.](https://catalog.data.gov/dataset?res_format=Zipped+SAS7BDAT)
+
+## More Information
+
+Other tools to look at for importing/exporting data to/from SAS:
+
+* [sas7bdat Python package](https://pypi.org/project/sas7bdat/)
+    * Useful in case you can't use Pandas for some reason
+    * Pandas (used in `sas2db`) uses [a modified version of the sas7bdat package](https://github.com/pandas-dev/pandas/blob/master/pandas/io/sas/sas7bdat.py)
+* [SAS ODBC drivers](http://support.sas.com/software/products/odbc/index.html)
+* SAS's [`PROC EXPORT`](http://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/viewer.htm#a000393175.htm)
+* [sas2bdat R package](https://cran.r-project.org/web/packages/sas7bdat/index.html)
+
+Information about data types:
 
 * Documentation
     * [SQLite types](https://www.sqlite.org/datatype3.html#affinity_name_examples)
