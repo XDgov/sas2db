@@ -72,7 +72,7 @@ sas2db --db postgresql+psycopg2://postgres@localhost:5432/sas_import path/to/src
 1. From the project directory, run
 
    ```sh
-   pipenv install
+   pipenv install --dev
    pipenv shell
    ```
 
