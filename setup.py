@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="sas2db",
-    version="0.2.0",
+    version="0.2.1",
     author="Aidan Feldman",
     author_email="aidan.l.feldman@census.gov",
     description="Import SAS files to SQL databases",
