@@ -22,9 +22,9 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
     ],
     install_requires=[
-        'inflection',
-        'pandas',
-        'sqlalchemy',
+        'inflection>0.3,<1',
+        'pandas>0.24,<1',
+        'sqlalchemy>1.3,<2',
     ],
     entry_points={
         'console_scripts': [
