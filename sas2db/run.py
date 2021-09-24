@@ -27,7 +27,7 @@ def get_args():
 
 
 def row_count(con, table):
-    result = con.execute('SELECT COUNT(*) FROM ' + table)
+    result = con.execute('SELECT COUNT(*) FROM ' + repr(table))
     return result.fetchone()[0]
 
 
